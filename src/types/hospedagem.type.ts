@@ -1,5 +1,6 @@
 export type HospedagemSchema = {
     id: string;
+    status: string;
     inicio: Date;
     fim: Date;
     pet: string;
