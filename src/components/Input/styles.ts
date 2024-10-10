@@ -7,7 +7,11 @@ export const Container = styled.div`
     position: relative;
 `;
 
-type ContentProps = {
+type ThemeProps = {
+    themeStyle: 'default' | 'short';
+}
+
+type ContentProps =  ThemeProps & {
     focus: string;
     error: string;
 }
@@ -25,9 +29,9 @@ export const Content = styled.div<ContentProps>`
         css`border-color: ${theme.colors.component_background};`
     }
     svg {
-        ${({ theme, focus, error }) => error ?
+        ${({ theme, focus, error }) => error === 'true' ?
             css`border-color: ${theme.colors.error};`:
-            focus ?
+            focus === 'true' ?
             css`color: ${theme.colors.primary};`:
             css`color: ${theme.colors.text};`
         }
@@ -36,9 +40,18 @@ export const Content = styled.div<ContentProps>`
     }
     display: flex;
     align-items: center;
+
+    ${({ themeStyle }) => themeStyle === 'short' &&
+        css`
+            padding: 6px 8px;
+            svg {
+                font-size: 22px;
+            }
+        `
+    };
 `;
 
-export const InputElement = styled.input`
+export const InputElement = styled.input<ThemeProps>`
     color: ${({ theme }) => theme.colors.text};
     
     &::placeholder {
@@ -49,12 +62,29 @@ export const InputElement = styled.input`
     background: none;
     width: 100%;
     height: auto;
+
+    &[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+    }
+    ${({ themeStyle }) => themeStyle === 'short' &&
+        css`
+            font-size: 15px;
+        `
+    };
 `;
 
-export const Label = styled.span`
+export const Label = styled.span<ThemeProps>`
     color: ${({ theme }) => theme.colors.text};
     font-weight: 500;
     padding-bottom: .5rem;
+
+    ${({ themeStyle }) => themeStyle === 'short' &&
+        css`
+            font-size: 14px;
+            padding-bottom: .2rem;
+            font-weight: 400;
+        `
+    };
 `;
 
 type TooltipProps= {

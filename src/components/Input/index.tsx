@@ -7,18 +7,29 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
     error?: { message?: string; };
     label?: string;
     registerName: string;
-    register: UseFormRegister<any>;
+    register?: UseFormRegister<any>;
+    theme?: 'default' | 'short';
 }
 
-export const Input = ({ Icon, label, error, register, registerName, ...input }: InputProps): JSX.Element => {
+export const Input = ({
+    Icon,
+    label,
+    error,
+    register,
+    registerName,
+    theme = 'default',
+    ...input
+}: InputProps): JSX.Element => {
     const [focus, setFocus] = useState(false);
     const [hovering, setHovering] = useState(false);
+    const outputs = register && register(registerName);
 
     return (
         <Container>
-            { label && <Label>{label}</Label> }
+            { label && <Label themeStyle={theme} >{label}</Label> }
             { error?.message && hovering && <Tooltip hover={hovering} >{error?.message}</Tooltip>}
             <Content
+                themeStyle={theme}
                 error={String(!!error)}
                 focus={String(focus)}
                 onMouseEnter={() => setHovering(true)}
@@ -26,7 +37,8 @@ export const Input = ({ Icon, label, error, register, registerName, ...input }: 
             >
                 {Icon && <Icon />}
                 <InputElement
-                    {...register(registerName)}
+                    themeStyle={theme}
+                    {...outputs}
                     {...input}
                     onFocus={() => setFocus(true)}
                     onBlur={() => setFocus(false)}

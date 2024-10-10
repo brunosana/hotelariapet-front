@@ -24,6 +24,17 @@ const GlobalStyles = createGlobalStyle`
     from { transform:rotate(0deg); }
     to { transform:rotate(360deg); }
   }
+
+  @keyframes dropdownIn {
+        0% { display: none; opacity: 0; top: 108%; };
+        1% { opacity: 0; top: 108% };
+        100% { opacity: 1; top: 105%; };
+  }
+  @keyframes dropdownOut {
+        0% { opacity: 1; top: 105%; };
+        99% { opacity: 0; top: 108% };
+        100% { opacity: 0; top: 108%; display: none; };
+  }
 `;
 
 export default GlobalStyles;
