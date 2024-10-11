@@ -59,6 +59,7 @@ export const Label = styled.span`
 `;
 
 export const DropdownItems = styled.div<DropdownProps>`
+    z-index: 8;
     width: 100%;
     position: absolute;
     top: 105%;

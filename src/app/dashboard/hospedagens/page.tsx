@@ -11,6 +11,7 @@ import { requestListHospedagens } from "@/api/requests/list-hospedagens";
 import { toastError } from "@/toast";
 import { HospedagemRow } from "@/components/HospedagemRow";
 import { applyFilters } from "@/utils";
+import { HospedagemModal } from "@/modals/Hospedagem";
 
 const status = ['TODAS', 'FINALIZADA', 'ATIVA', 'CANCELADA', 'CHECKOUT', 'RESERVA'];
 
@@ -20,6 +21,8 @@ export default function Hospedagens() {
     const [hospedagens, setHospedagens] = useState<Array<HospedagemSchema>>([]);
     const [filteredHospedagens, setFilteredHospedagens] = useState<Array<HospedagemSchema>>([]);
 
+    const [showModal, setShowModal] = useState(false);
+
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState('');
     const [filterStatus, setFilterStatus] = useState('TODAS');
@@ -27,6 +30,15 @@ export default function Hospedagens() {
     const [filterDataFim, setFilterDataFim] = useState<undefined | string>(undefined);
 
     const handleFilterHospedagens = () => applyFilters(hospedagens, filter);
+
+    const handleShowModal = () => {
+        setShowModal(true);
+        setBlur(true);
+    }
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setBlur(false);
+    }
 
     useEffect(() => {
         let finalFilter: Array<HospedagemSchema> = handleFilterHospedagens();
@@ -45,24 +57,27 @@ export default function Hospedagens() {
         setFilteredHospedagens(finalFilter);
     }, [filter, hospedagens, filterStatus, filterDataInicio, filterDataFim]);
 
-    useEffect(() => {
+    async function handleStart() {
         setBlur(true);
         setLoading(true);
-
-        requestListHospedagens()
-        .then((data) => {
-            setHospedagens(data);
-            setFilteredHospedagens(data);
-        })
-        .catch(() => toastError('Erro ao buscar hospedagens'))
-        .finally(() => {
+        try {
+            const response = await requestListHospedagens();
+            setHospedagens(response);
+            setFilteredHospedagens(response);
+        } catch(err) {
+            toastError('Erro ao buscar hospedagens')
+        } finally {
             setBlur(false);
             setLoading(false);
-        })
+        }
+    }
+    useEffect(() => {
+        handleStart();
     }, []);
 
     return(
         <>
+        { showModal && <HospedagemModal onClose={handleCloseModal} /> }
         { loading && <Loading /> }
         <Content>
             <ActionsArea>
@@ -110,7 +125,7 @@ export default function Hospedagens() {
                     }}
                 />
                 <div />
-                <ButtonPage>CRIAR</ButtonPage>
+                <ButtonPage onClick={handleShowModal} >CRIAR</ButtonPage>
             </ActionsArea>
             <ItemsArea>
                 <ItemsHeader>
