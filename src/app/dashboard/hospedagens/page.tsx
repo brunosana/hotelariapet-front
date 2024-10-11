@@ -39,6 +39,22 @@ export default function Hospedagens() {
         setShowModal(false);
         setBlur(false);
     }
+    useEffect(() => {
+        let finalFilter: Array<HospedagemSchema> = handleFilterHospedagens();
+        if(filterStatus !== 'TODAS') {
+            finalFilter = finalFilter.filter(h => h.status.includes(filterStatus));
+        }
+
+        if(filterDataInicio) {
+            finalFilter = finalFilter.filter(h => h.inicio.getTime() >= new Date(filterDataInicio).getTime());
+        }
+
+        if(filterDataFim) {
+            finalFilter = finalFilter.filter(h => new Date(filterDataFim).getTime() >= h.inicio.getTime());
+        }
+
+        setFilteredHospedagens(finalFilter);
+    }, [filter, hospedagens, filterStatus, filterDataInicio, filterDataFim]);
 
     useEffect(() => {
         let finalFilter: Array<HospedagemSchema> = handleFilterHospedagens();
