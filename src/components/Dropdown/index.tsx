@@ -6,14 +6,14 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
     label?: string;
     items: Array<string>;
     defaultOption: string;
-    onSelect: (option: string) => void;
+    onUpdate: (option: string) => void;
 }
 
 export const Dropdown = ({
     label,
     defaultOption,
     items,
-    onSelect,
+    onUpdate,
     ...input
 }: InputProps): JSX.Element => {
     const [active, setActive] = useState<boolean | null>();
@@ -22,7 +22,7 @@ export const Dropdown = ({
     const handleSelect = (option: string) => {
         setActive(false);
         setOption(option);
-        onSelect(option);
+        onUpdate(option);
     }
 
     return (

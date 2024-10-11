@@ -10,12 +10,40 @@ import { HospedagemSchema } from "@/types";
 import { requestListHospedagens } from "@/api/requests/list-hospedagens";
 import { toastError } from "@/toast";
 import { HospedagemRow } from "@/components/HospedagemRow";
+import { applyFilters } from "@/utils";
+
+const status = ['TODAS', 'FINALIZADA', 'ATIVA', 'CANCELADA', 'CHECKOUT', 'RESERVA'];
 
 export default function Hospedagens() {
 
     const setBlur = useStorage((state) => state.statesChange.setBlur);
     const [hospedagens, setHospedagens] = useState<Array<HospedagemSchema>>([]);
+    const [filteredHospedagens, setFilteredHospedagens] = useState<Array<HospedagemSchema>>([]);
+
     const [loading, setLoading] = useState(false);
+    const [filter, setFilter] = useState('');
+    const [filterStatus, setFilterStatus] = useState('TODAS');
+    const [filterDataInicio, setFilterDataInicio] = useState<undefined | string>(undefined);
+    const [filterDataFim, setFilterDataFim] = useState<undefined | string>(undefined);
+
+    const handleFilterHospedagens = () => applyFilters(hospedagens, filter);
+
+    useEffect(() => {
+        let finalFilter: Array<HospedagemSchema> = handleFilterHospedagens();
+        if(filterStatus !== 'TODAS') {
+            finalFilter = finalFilter.filter(h => h.status.includes(filterStatus));
+        }
+
+        if(filterDataInicio) {
+            finalFilter = finalFilter.filter(h => h.inicio.getTime() >= new Date(filterDataInicio).getTime());
+        }
+
+        if(filterDataFim) {
+            finalFilter = finalFilter.filter(h => new Date(filterDataFim).getTime() >= h.inicio.getTime());
+        }
+
+        setFilteredHospedagens(finalFilter);
+    }, [filter, hospedagens, filterStatus, filterDataInicio, filterDataFim]);
 
     useEffect(() => {
         setBlur(true);
@@ -24,13 +52,14 @@ export default function Hospedagens() {
         requestListHospedagens()
         .then((data) => {
             setHospedagens(data);
+            setFilteredHospedagens(data);
         })
         .catch(() => toastError('Erro ao buscar hospedagens'))
         .finally(() => {
             setBlur(false);
             setLoading(false);
         })
-    }, [])
+    }, []);
 
     return(
         <>
@@ -43,13 +72,18 @@ export default function Hospedagens() {
                     registerName="search"
                     Icon={IoIosSearch}
                     placeholder="Pesquise por código, pet, status..."
+                    value={filter}
+                    onChange={(e) => {
+                        e.preventDefault();
+                        setFilter(e.target.value);
+                    }}
                 />
                 <div />
                 <Dropdown
                     label="Status"
                     defaultOption="TODAS"
-                    items={['teste', 'legal']}
-                    onSelect={() => ({})}
+                    items={status}
+                    onUpdate={(st) => setFilterStatus(st)}
                 />
                 <Input
                     label="Data início"
@@ -57,6 +91,11 @@ export default function Hospedagens() {
                     registerName="Data"
                     type='date'
                     placeholder="Pesquise por código, pet, status..."
+                    value={filterDataInicio}
+                    onChange={(e) => {
+                        e.preventDefault();
+                        setFilterDataInicio(e.target.value);
+                    }}
                 />
                 <Input
                     label="Data Fim"
@@ -85,7 +124,7 @@ export default function Hospedagens() {
                     :
                     <>
                         {
-                            hospedagens.map(hospedagem => (
+                            filteredHospedagens.map(hospedagem => (
                                 <HospedagemRow
                                     key={hospedagem.id}
                                     hospedagem={hospedagem}
