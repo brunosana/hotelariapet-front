@@ -6,8 +6,8 @@ import { HospedagemStatus } from "../HospedagemStatus";
 
 type HospedagemProps = {
     hospedagem: HospedagemSchema,
-    onEdit: (id: HospedagemSchema['id']) => void;
-    onDelete: (id: HospedagemSchema['id']) => void;
+    onEdit: () => void;
+    onDelete: () => void;
 }
 
 export const HospedagemRow = ({
@@ -27,8 +27,8 @@ export const HospedagemRow = ({
                 <HospedagemStatus hospedagem={hospedagem} />
             </Info>
             <Actions>
-                <HiOutlinePencil />
-                <FaRegTrashCan />
+                <HiOutlinePencil onClick={onEdit} />
+                <FaRegTrashCan onClick={onDelete} />
             </Actions>
         </Content>
     )

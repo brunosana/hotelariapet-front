@@ -8,9 +8,12 @@ import { useStorage } from "@/stores";
 import { useEffect, useState } from "react";
 import { HospedagemSchema } from "@/types";
 import { requestListHospedagens } from "@/api/requests/list-hospedagens";
-import { toastError } from "@/toast";
+import { toastError, toastSuccess } from "@/toast";
 import { HospedagemRow } from "@/components/HospedagemRow";
 import { applyFilters } from "@/utils";
+import { HospedagemModal } from "@/modals/Hospedagem";
+import { ConfirmationModal } from "@/modals/ConfirmationModal";
+import { requestDeleteHospedagen } from "@/api/requests/delete-hospedagens";
 
 const status = ['TODAS', 'FINALIZADA', 'ATIVA', 'CANCELADA', 'CHECKOUT', 'RESERVA'];
 
@@ -20,6 +23,9 @@ export default function Hospedagens() {
     const [hospedagens, setHospedagens] = useState<Array<HospedagemSchema>>([]);
     const [filteredHospedagens, setFilteredHospedagens] = useState<Array<HospedagemSchema>>([]);
 
+    const [showModal, setShowModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState('');
     const [filterStatus, setFilterStatus] = useState('TODAS');
@@ -28,6 +34,37 @@ export default function Hospedagens() {
 
     const handleFilterHospedagens = () => applyFilters(hospedagens, filter);
 
+    const [hospedagemDelete, setHospedagemDelete] = useState<HospedagemSchema>();
+    const handleShowDeleteModal = (hospedagem: HospedagemSchema) => {
+        setHospedagemDelete(hospedagem);
+        setShowDeleteModal(true);
+        setBlur(true);
+    }
+
+    const handleDeleteHospedagem = () => {
+        if(hospedagemDelete) {
+            requestDeleteHospedagen(hospedagemDelete.id)
+            .then(() => {
+                handleCloseDeleteModal();
+                toastSuccess('Hospedagem excluída')
+            })
+            .catch(() => toastError('Erro ao excluir hospedagem'));
+        }
+    }
+
+    const handleCloseDeleteModal = () => {
+        setShowDeleteModal(false);
+        setBlur(false);
+    }
+
+    const handleShowModal = () => {
+        setShowModal(true);
+        setBlur(true);
+    }
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setBlur(false);
+    }
     useEffect(() => {
         let finalFilter: Array<HospedagemSchema> = handleFilterHospedagens();
         if(filterStatus !== 'TODAS') {
@@ -46,23 +83,49 @@ export default function Hospedagens() {
     }, [filter, hospedagens, filterStatus, filterDataInicio, filterDataFim]);
 
     useEffect(() => {
+        let finalFilter: Array<HospedagemSchema> = handleFilterHospedagens();
+        if(filterStatus !== 'TODAS') {
+            finalFilter = finalFilter.filter(h => h.status.includes(filterStatus));
+        }
+
+        if(filterDataInicio) {
+            finalFilter = finalFilter.filter(h => h.inicio.getTime() >= new Date(filterDataInicio).getTime());
+        }
+
+        if(filterDataFim) {
+            finalFilter = finalFilter.filter(h => new Date(filterDataFim).getTime() >= h.inicio.getTime());
+        }
+
+        setFilteredHospedagens(finalFilter);
+    }, [filter, hospedagens, filterStatus, filterDataInicio, filterDataFim]);
+
+    async function handleStart() {
         setBlur(true);
         setLoading(true);
-
-        requestListHospedagens()
-        .then((data) => {
-            setHospedagens(data);
-            setFilteredHospedagens(data);
-        })
-        .catch(() => toastError('Erro ao buscar hospedagens'))
-        .finally(() => {
+        try {
+            const response = await requestListHospedagens();
+            setHospedagens(response);
+            setFilteredHospedagens(response);
+        } catch(err) {
+            toastError('Erro ao buscar hospedagens')
+        } finally {
             setBlur(false);
             setLoading(false);
-        })
+        }
+    }
+    useEffect(() => {
+        handleStart();
     }, []);
 
     return(
         <>
+        { showDeleteModal &&
+            <ConfirmationModal
+                onConfirm={handleDeleteHospedagem}
+                onReject={handleCloseDeleteModal}
+            />
+        }
+        { showModal && <HospedagemModal onClose={handleCloseModal} /> }
         { loading && <Loading /> }
         <Content>
             <ActionsArea>
@@ -103,9 +166,14 @@ export default function Hospedagens() {
                     registerName="Data"
                     type='date'
                     placeholder="Pesquise por código, pet, status..."
+                    value={filterDataFim}
+                    onChange={(e) => {
+                        e.preventDefault();
+                        setFilterDataFim(e.target.value);
+                    }}
                 />
                 <div />
-                <ButtonPage>CRIAR</ButtonPage>
+                <ButtonPage onClick={handleShowModal} >CRIAR</ButtonPage>
             </ActionsArea>
             <ItemsArea>
                 <ItemsHeader>
@@ -128,7 +196,9 @@ export default function Hospedagens() {
                                 <HospedagemRow
                                     key={hospedagem.id}
                                     hospedagem={hospedagem}
-                                    onDelete={() => {}}
+                                    onDelete={() => {
+                                        handleShowDeleteModal(hospedagem);
+                                    }}
                                     onEdit={() => {}}
                                 />
                             ))
