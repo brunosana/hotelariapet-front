@@ -8,10 +8,12 @@ import { useStorage } from "@/stores";
 import { useEffect, useState } from "react";
 import { HospedagemSchema } from "@/types";
 import { requestListHospedagens } from "@/api/requests/list-hospedagens";
-import { toastError } from "@/toast";
+import { toastError, toastSuccess } from "@/toast";
 import { HospedagemRow } from "@/components/HospedagemRow";
 import { applyFilters } from "@/utils";
 import { HospedagemModal } from "@/modals/Hospedagem";
+import { ConfirmationModal } from "@/modals/ConfirmationModal";
+import { requestDeleteHospedagen } from "@/api/requests/delete-hospedagens";
 
 const status = ['TODAS', 'FINALIZADA', 'ATIVA', 'CANCELADA', 'CHECKOUT', 'RESERVA'];
 
@@ -22,6 +24,7 @@ export default function Hospedagens() {
     const [filteredHospedagens, setFilteredHospedagens] = useState<Array<HospedagemSchema>>([]);
 
     const [showModal, setShowModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState('');
@@ -30,6 +33,29 @@ export default function Hospedagens() {
     const [filterDataFim, setFilterDataFim] = useState<undefined | string>(undefined);
 
     const handleFilterHospedagens = () => applyFilters(hospedagens, filter);
+
+    const [hospedagemDelete, setHospedagemDelete] = useState<HospedagemSchema>();
+    const handleShowDeleteModal = (hospedagem: HospedagemSchema) => {
+        setHospedagemDelete(hospedagem);
+        setShowDeleteModal(true);
+        setBlur(true);
+    }
+
+    const handleDeleteHospedagem = () => {
+        if(hospedagemDelete) {
+            requestDeleteHospedagen(hospedagemDelete.id)
+            .then(() => {
+                handleCloseDeleteModal();
+                toastSuccess('Hospedagem excluída')
+            })
+            .catch(() => toastError('Erro ao excluir hospedagem'));
+        }
+    }
+
+    const handleCloseDeleteModal = () => {
+        setShowDeleteModal(false);
+        setBlur(false);
+    }
 
     const handleShowModal = () => {
         setShowModal(true);
@@ -93,6 +119,12 @@ export default function Hospedagens() {
 
     return(
         <>
+        { showDeleteModal &&
+            <ConfirmationModal
+                onConfirm={handleDeleteHospedagem}
+                onReject={handleCloseDeleteModal}
+            />
+        }
         { showModal && <HospedagemModal onClose={handleCloseModal} /> }
         { loading && <Loading /> }
         <Content>
@@ -164,7 +196,9 @@ export default function Hospedagens() {
                                 <HospedagemRow
                                     key={hospedagem.id}
                                     hospedagem={hospedagem}
-                                    onDelete={() => {}}
+                                    onDelete={() => {
+                                        handleShowDeleteModal(hospedagem);
+                                    }}
                                     onEdit={() => {}}
                                 />
                             ))
