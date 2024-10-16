@@ -11,9 +11,10 @@ import { requestListHospedagens } from "@/api/requests/list-hospedagens";
 import { toastError, toastSuccess } from "@/toast";
 import { HospedagemRow } from "@/components/HospedagemRow";
 import { applyFilters } from "@/utils";
-import { HospedagemModal } from "@/modals/Hospedagem";
+import { HospedagemModal } from "@/modals/Hospedagem/Criar";
 import { ConfirmationModal } from "@/modals/ConfirmationModal";
 import { requestDeleteHospedagen } from "@/api/requests/delete-hospedagens";
+import { HospedagemEditModal } from "@/modals/Hospedagem/Alterar";
 
 const status = ['TODAS', 'FINALIZADA', 'ATIVA', 'CANCELADA', 'CHECKOUT', 'RESERVA'];
 
@@ -21,12 +22,15 @@ export default function Hospedagens() {
 
     const setBlur = useStorage((state) => state.statesChange.setBlur);
     const [hospedagens, setHospedagens] = useState<Array<HospedagemSchema>>([]);
+    const [hospedagemEdit, setHospedagemEdit] = useState<HospedagemSchema>();
     const [filteredHospedagens, setFilteredHospedagens] = useState<Array<HospedagemSchema>>([]);
 
     const [showModal, setShowModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     const [loading, setLoading] = useState(false);
+    const [actionLoading, setActionLoading] = useState(false);
     const [filter, setFilter] = useState('');
     const [filterStatus, setFilterStatus] = useState('TODAS');
     const [filterDataInicio, setFilterDataInicio] = useState<undefined | string>(undefined);
@@ -43,12 +47,14 @@ export default function Hospedagens() {
 
     const handleDeleteHospedagem = () => {
         if(hospedagemDelete) {
+            setActionLoading(true)
             requestDeleteHospedagen(hospedagemDelete.id)
             .then(() => {
                 handleCloseDeleteModal();
                 toastSuccess('Hospedagem excluída')
             })
-            .catch(() => toastError('Erro ao excluir hospedagem'));
+            .catch(() => toastError('Erro ao excluir hospedagem'))
+            .finally(() => setActionLoading(false));
         }
     }
 
@@ -65,22 +71,15 @@ export default function Hospedagens() {
         setShowModal(false);
         setBlur(false);
     }
-    useEffect(() => {
-        let finalFilter: Array<HospedagemSchema> = handleFilterHospedagens();
-        if(filterStatus !== 'TODAS') {
-            finalFilter = finalFilter.filter(h => h.status.includes(filterStatus));
-        }
 
-        if(filterDataInicio) {
-            finalFilter = finalFilter.filter(h => h.inicio.getTime() >= new Date(filterDataInicio).getTime());
-        }
-
-        if(filterDataFim) {
-            finalFilter = finalFilter.filter(h => new Date(filterDataFim).getTime() >= h.inicio.getTime());
-        }
-
-        setFilteredHospedagens(finalFilter);
-    }, [filter, hospedagens, filterStatus, filterDataInicio, filterDataFim]);
+    const handleShowEditModal = () => {
+        setShowEditModal(true);
+        setBlur(true);
+    }
+    const handleCloseEditModal = () => {
+        setShowEditModal(false);
+        setBlur(false);
+    }
 
     useEffect(() => {
         let finalFilter: Array<HospedagemSchema> = handleFilterHospedagens();
@@ -121,8 +120,15 @@ export default function Hospedagens() {
         <>
         { showDeleteModal &&
             <ConfirmationModal
+                loading={actionLoading}
                 onConfirm={handleDeleteHospedagem}
                 onReject={handleCloseDeleteModal}
+            />
+        }
+        { showEditModal && hospedagemEdit &&
+            <HospedagemEditModal
+                hospedagem={hospedagemEdit}
+                onClose={handleCloseEditModal}
             />
         }
         { showModal && <HospedagemModal onClose={handleCloseModal} /> }
@@ -199,7 +205,10 @@ export default function Hospedagens() {
                                     onDelete={() => {
                                         handleShowDeleteModal(hospedagem);
                                     }}
-                                    onEdit={() => {}}
+                                    onEdit={() => {
+                                        setHospedagemEdit(hospedagem);
+                                        handleShowEditModal();
+                                    }}
                                 />
                             ))
                         }

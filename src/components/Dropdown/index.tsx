@@ -1,12 +1,15 @@
 import { InputHTMLAttributes, useState } from "react";
 import { Container, Content, DropdownItems, Item, Label } from "./styles"
 import { IoIosArrowDown } from "react-icons/io";
+import { RiLoader3Line } from "react-icons/ri";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
     label?: string;
     items: Array<string>;
     defaultOption: string;
+    option?: string;
     onUpdate: (option: string) => void;
+    loading?: boolean;
 }
 
 export const Dropdown = ({
@@ -14,10 +17,12 @@ export const Dropdown = ({
     defaultOption,
     items,
     onUpdate,
+    loading = false,
+    option: currentOption,
     ...input
 }: InputProps): JSX.Element => {
     const [active, setActive] = useState<boolean | null>();
-    const [option, setOption] = useState(defaultOption);
+    const [option, setOption] = useState(currentOption ? currentOption : defaultOption);
 
     const handleSelect = (option: string) => {
         setActive(false);
@@ -32,7 +37,7 @@ export const Dropdown = ({
                 active={String(active)}
                 onClick={() => setActive(!active)}
             >
-                {option}
+                {loading ? <RiLoader3Line id="loading-dropdown" /> : <>{currentOption ? currentOption: option}</>}
                 <IoIosArrowDown />
             </Content>
             <DropdownItems

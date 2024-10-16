@@ -1,17 +1,19 @@
 import { IoClose } from "react-icons/io5";
-import { Actions, Content, Divisor, Form, Head, Info, Modal, SpliterForm, Title } from "./styles"
+import { Actions, Content, Divisor, Form, Head, Info, Modal, SpliterForm, Title } from "../styles"
 import { Input } from "@/components/Input";
 import { Dropdown } from "@/components/Dropdown";
 import { Button } from "@/components/Button";
 import { useEffect, useState } from "react";
-import { PetSchema } from "@/types";
+import { HospedagemSchema, PetSchema } from "@/types";
 import { requestListPets } from "@/api/requests/list-pets";
 import { useForm } from "react-hook-form";
-import { requestCreateHospedagens } from "@/api/requests/create-hospedagens";
 import { toastError, toastSuccess } from "@/toast";
+import { Loading } from "@/components/Loading";
+import { requestEditHospedagem } from "@/api/requests/edit-hospedagem";
 
 type ModalProps = {
     onClose: () => void;
+    hospedagem: HospedagemSchema;
 }
 
 type FormProps = {
@@ -19,30 +21,37 @@ type FormProps = {
     dataFim: Date;
 }
 
-export const HospedagemModal = ({
-    onClose
+export const HospedagemEditModal = ({
+    onClose,
+    hospedagem,
 }: ModalProps): JSX.Element => {
     const [pets, setPets] = useState<Array<PetSchema>>([]);
-    const [selectedPed, setSelectedPet] = useState<PetSchema | null>();
+    const [selectedPet, setSelectedPet] = useState<PetSchema | null>();
 
     const [loading, setLoading] = useState(false);
+    const [initialLoading, setInicialLoading] = useState(true);
 
-    const handleCreateHospedagem = (input: FormProps) => {
+    const handleEditHospedagem = (input: FormProps) => {
         setLoading(true);
-        if(!selectedPed) {
+        if(!selectedPet) {
             toastError('Selecione um pet');
             return;
         }
-        requestCreateHospedagens({
-            inicio: input.dataInicio,
-            fim: input.dataFim,
-            pet: selectedPed.id,
+        
+        requestEditHospedagem({
+            hospedagem: {
+                inicio: input.dataInicio,
+                fim: input.dataFim,
+                id: hospedagem.id,
+                pet: selectedPet.nome,
+                status: hospedagem.status,
+            }
         })
         .then(() => {
-            toastSuccess('Hospedagem Criada');
+            toastSuccess('Hospedagem Editada');
             onClose();
         })
-        .catch(() => toastError('Erro ao criar hospedagem'))
+        .catch(() => toastError('Erro ao editar hospedagem'))
         .finally(() => setLoading(false));
     }
 
@@ -53,25 +62,34 @@ export const HospedagemModal = ({
       } = useForm<FormProps>();
 
     useEffect(() => {
-        requestListPets().then((pets) => setPets(pets));
-    },[])
+        console.log(hospedagem);
+        requestListPets()
+        .then((pets) => {
+            setPets(pets);
+            setSelectedPet(pets.find(pet => pet.nome === hospedagem.pet));
+        })
+        .finally(() => setInicialLoading(false));
+    },[]);
 
     return (
         <Content>
             <Modal>
+                { initialLoading && <Loading /> }
                 <Actions>
                     <IoClose onClick={onClose} />
                 </Actions>
                 <Head>
-                    <Title>Registrar nova hospedagem</Title>
+                    <Title>Editar hospedagem {hospedagem.id }</Title>
                     <Info>Preencha os dados corretamente para registrar uma nova hospedagem</Info>
                 </Head>
                 <Form
-                    onSubmit={handleSubmit(handleCreateHospedagem)}
+                    onSubmit={handleSubmit(handleEditHospedagem)}
                 >
                     <Dropdown
                         label="Hóspede"
-                        defaultOption={pets[0]?.nome ?? '--'}
+                        loading={initialLoading}
+                        defaultOption={pets.find(pet => pet.nome === hospedagem.pet)?.nome ?? '--'}
+                        option={selectedPet?.nome}
                         items={pets.map(pet => pet.nome)}
                         onUpdate={(newPet) => setSelectedPet(pets.find(pet => pet.nome === newPet))}
                     />
@@ -82,6 +100,7 @@ export const HospedagemModal = ({
                             registerName="dataInicio"
                             theme="short"
                             type="date"
+                            defaultValue={hospedagem.inicio.toISOString().split('T')[0]}
                             min={new Date().toISOString().split('T')[0]}
                         />
                         <Input
@@ -90,10 +109,11 @@ export const HospedagemModal = ({
                             registerName="dataFim"
                             theme="short"
                             type="date"
+                            defaultValue={hospedagem.fim.toISOString().split('T')[0]}
                         />
                     </SpliterForm>
                     <Divisor />
-                    <Button loading={loading} >Criar nova Hospedagem</Button>
+                    <Button loading={loading} >Editar Hospedagem</Button>
                 </Form>
             </Modal>
         </Content>

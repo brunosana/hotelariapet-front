@@ -1,4 +1,5 @@
 import styled, { css } from "styled-components";
+import { Loading } from "../Loading";
 
 export const Container = styled.div`
     width: 100%;
@@ -30,6 +31,11 @@ export const Content = styled.div<DropdownProps>`
     }
     display: flex;
     align-items: center;
+
+    svg#loading-dropdown {
+        animation: spin 1s infinite;
+        margin: 0 auto;
+    }
 
     &:focus {
         border-color: ${({ theme }) => theme.colors.primary};
@@ -85,3 +91,5 @@ export const Item = styled.span`
         background-color: ${({ theme }) => theme.colors.component_hover};
     }
 `;
+
+export const LoadingDrop = styled(Loading)``;
