@@ -7,7 +7,7 @@ export const Content = styled.div`
 
 export const ActionsArea = styled.div`
     display: grid;
-    grid-template-columns: 3fr 0.2fr 1fr 1fr 1fr 0.1fr 1fr;
+    grid-template-columns: 3fr 0.2fr 1fr 1fr 0.1fr 1fr;
     gap: 15px;
     align-items: center;
 `;
@@ -18,7 +18,7 @@ export const ItemsArea = styled.div`
 
 export const ItemsHeader = styled.div`
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1.5fr 2fr 2fr 2fr 2fr;
+    grid-template-columns: 0.5fr 2fr 1.5fr 1.5fr 1fr 2fr 2fr;
     gap: 15px;
     border-bottom: 2px solid ${({ theme }) => theme.colors.input_background};
     padding: 0 15px;

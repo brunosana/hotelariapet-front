@@ -62,7 +62,6 @@ export const HospedagemEditModal = ({
       } = useForm<FormProps>();
 
     useEffect(() => {
-        console.log(hospedagem);
         requestListPets()
         .then((pets) => {
             setPets(pets);

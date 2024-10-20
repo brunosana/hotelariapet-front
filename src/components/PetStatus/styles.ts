@@ -1,11 +1,11 @@
 import styled from "styled-components";
 
 type Props = {
-    color: string;
+    bgColor: string;
 }
 export const Content = styled.div<Props>`
-    background-color: ${({ color }) => color};
     color: ${({ theme }) => theme.colors.text};
+    background-color: ${({ bgColor }) => bgColor};
 
     padding: 7px;
     max-width: 70%;

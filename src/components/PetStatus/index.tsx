@@ -20,7 +20,7 @@ export const PetStatus = ({ pet }: PetStatusProps): any => {
     }
   })()
   return (
-    <Content color={backgroundColor}>
+    <Content bgColor={backgroundColor}>
       {status} 
     </Content>)
     ;

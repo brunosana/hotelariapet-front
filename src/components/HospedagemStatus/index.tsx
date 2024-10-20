@@ -18,7 +18,7 @@ export const HospedagemStatus = ({ hospedagem }: HospedagemStatusProps): JSX.Ele
     })()
     return (
         <Content
-            color={backgroundColor}
+        bgColor={backgroundColor}
         >
             {hospedagem.status}
         </Content>
