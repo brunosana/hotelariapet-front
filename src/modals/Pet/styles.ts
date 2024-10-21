@@ -1,4 +1,3 @@
-import { Input } from "@/components/Input";
 import styled from "styled-components";
 
 export const Content = styled.div`
@@ -57,12 +56,19 @@ export const Info = styled.span`
 `;
 
 export const Form = styled.form`
-    margin-top: 2rem;
+    padding-top: 2rem;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    max-height: 88%;
+    overflow: hidden;
+
+    & > div {
+        margin-top: 0.4rem;
+    }
 
     button {
-        margin-top: calc(100% - 100px);
+        margin-top: auto;
     }
 `;
 

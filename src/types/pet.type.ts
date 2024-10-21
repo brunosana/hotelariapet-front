@@ -1,12 +1,12 @@
 export type PetSchema = {
     id: string;
     nome: string;
-    idade?: number;
-    raca?: string;
+    idade: number;
+    raca: string;
     sexo: string;
-    especie?: string;
+    especie: string;
     fotoUrl?: string;
     peso: number;
-    tutorId?: string;
+    tutorId: string;
     status: string;
 };

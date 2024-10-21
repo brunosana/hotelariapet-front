@@ -6,8 +6,8 @@ import { Actions, Content, Info } from "./styles";
 
 type PetProps = {
   pet: PetSchema,
-  onEdit: (id: PetSchema['id']) => void;
-  onDelete: (id: PetSchema['id']) => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
 export const PetRow = ({
@@ -26,8 +26,8 @@ export const PetRow = ({
         <PetStatus pet={pet}/>
       </Info>
       <Actions>
-          <HiOutlinePencil/>
-          <FaRegTrashCan/>
+          <HiOutlinePencil onClick={onEdit} />
+          <FaRegTrashCan onClick={onDelete} />
       </Actions>
     </Content>      
   )

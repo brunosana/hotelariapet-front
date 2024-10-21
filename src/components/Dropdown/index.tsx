@@ -7,7 +7,7 @@ import { randomUUID } from "crypto";
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
     label?: string;
     items: Array<string>;
-    defaultOption: string;
+    defaultOption?: string;
     option?: string;
     onUpdate?: (option: string) => void;
     loading?: boolean;
@@ -25,7 +25,7 @@ export const Dropdown = ({
     ...input
 }: InputProps): JSX.Element => {
     const [active, setActive] = useState<boolean | null>(false);
-    const [option, setOption] = useState(currentOption ? currentOption : defaultOption);
+    const [option, setOption] = useState(currentOption ? currentOption : (defaultOption ?? 'Selecione'));
 
     const handleSelect = (option: string) => {
         setActive(false);
