@@ -104,8 +104,8 @@ export const PetEditModal = ({
                     <IoClose onClick={onClose} />
                 </Actions>
                 <Head>
-                    <Title>Registrar novo Pet</Title>
-                    <Info>Preencha os dados corretamente para registrar um novo Pet</Info>
+                    <Title>Editar Pet {pet.id}</Title>
+                    <Info>Preencha os dados corretamente para editar o Pet {pet.id}</Info>
                 </Head>
                 <Form
                     onSubmit={handleSubmit(handleEditPet)}
